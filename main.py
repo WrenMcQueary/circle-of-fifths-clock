@@ -9,9 +9,6 @@ import tkinter
 from drawers import animation_loop
 
 
-# TODO: Write readme
-
-
 if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(description="Joke idea. Virtual wall clock that uses the circle of fifths instead of ordinary numbers")

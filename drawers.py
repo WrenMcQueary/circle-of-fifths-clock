@@ -1,6 +1,5 @@
 from datetime import datetime
 from math import pi, sin, cos, floor, ceil
-from PIL import Image, ImageTk
 
 
 def animation_loop(window_, canvas_, render_in: str) -> None:
