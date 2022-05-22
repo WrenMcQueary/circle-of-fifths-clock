@@ -2,3 +2,5 @@
 .idea/
 venv/
 
+# Others
+__pycache__/
