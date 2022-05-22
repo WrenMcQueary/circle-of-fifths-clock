@@ -34,5 +34,5 @@ if __name__ == "__main__":
     my_canvas.grid(row=0, column=0)
 
     # Repeatedly get the time and draw it
-    my_canvas.after(1000, lambda: animation_loop(my_canvas, render))
+    my_canvas.after(1000, lambda: animation_loop(window, my_canvas, render))
     window.mainloop()

@@ -1,8 +1,9 @@
 from datetime import datetime
 from math import pi, sin, cos, floor, ceil
+from PIL import Image, ImageTk
 
 
-def animation_loop(canvas_, render_in: str) -> None:
+def animation_loop(window_, canvas_, render_in: str) -> None:
     """Repeatedly update the canvas with a circle-of-fifths clock.
     :param canvas_:       the tkinter canvas object
     :param render_in:       either "analog" or "digital", to indicate the type of clock that should be drawn
@@ -28,10 +29,10 @@ def animation_loop(canvas_, render_in: str) -> None:
         hour, minute, second = current.hour, current.minute, current.second
 
         # Update the canvas using the appropriate function for render method
-        render_in_to_render_function[render_in](canvas_, hour, minute, second)
+        render_in_to_render_function[render_in](window_, canvas_, hour, minute, second)
 
 
-def render_analog(canvas_in, hour_in: int, minute_in: int, second_in: int):
+def render_analog(window_in, canvas_in, hour_in: int, minute_in: int, second_in: int):
     """Draw an animated clock in 'analog' style
     """
     # Handle errors
@@ -120,7 +121,7 @@ def render_analog(canvas_in, hour_in: int, minute_in: int, second_in: int):
     canvas_in.update()
 
 
-def render_digital(canvas_in, hour_in: int, minute_in: int, second_in: int):
+def render_digital(window_in, canvas_in, hour_in: int, minute_in: int, second_in: int):
     """Draw an animated clock in 'digital' style.
     """
     # Handle errors
@@ -176,8 +177,24 @@ def render_digital(canvas_in, hour_in: int, minute_in: int, second_in: int):
         opacity_1 = abs(minute_in - round_1)
     symbol_0, symbol_1 = minute_over_five_to_minor[round_0], minute_over_five_to_minor[round_1]
     # Draw them
-    canvas_in.create_text((900 - outer_box_margin_horizontal - 450) / 2, 450, text=symbol_0, font=("Helvetica", 128), fill="black", alpha=opacity_0)
-    canvas_in.create_text((900 - outer_box_margin_horizontal - 450) / 2, 450, text=symbol_1, font=("Helvetica", 128), fill="black", alpha=opacity_1)
+    create_text_with_transparency(window_in, canvas_in, (900 - outer_box_margin_horizontal - 450) / 2, 450, text=symbol_0, font=("Helvetica", 128), fill="black", alpha=opacity_0)
+    create_text_with_transparency(window_in, canvas_in, (900 - outer_box_margin_horizontal - 450) / 2, 450, text=symbol_1, font=("Helvetica", 128), fill="black", alpha=opacity_1)
 
     # Update the canvas
     canvas_in.update()
+
+
+def create_text_with_transparency(window, canvas, x, y, **options):
+    """Extends Tkinter's canvas.create_text by allowing for an alpha value.
+    Based on the example shown here: https://www.tutorialspoint.com/how-to-make-a-tkinter-canvas-rectangle-transparent
+    """
+    if "alpha" in options:
+        # Calculate the alpha transparency for every color (RGB)
+        alpha = int(options.pop("alpha") * 255)
+        # Use the fill variable to fill the shape with transparent color
+        fill = options.pop('fill')
+        fill = window.winfo_rgb(fill) + (alpha,)
+        image = Image.new('RGBA', (900, 900), fill)
+        images.append(ImageTk.PhotoImage(image))
+        canvas.create_image(x, y, image=images[-1], anchor='nw')
+        canvas.create_rectangle(x, y, a, b, **options)
