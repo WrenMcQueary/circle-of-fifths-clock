@@ -1,4 +1,4 @@
-# circle-of-fifths-wall-clock
+# circle-of-fifths-clock
 Joke idea.  Virtual wall clock that uses the circle of fifths instead of ordinary numbers.
 
 # CLI parameters
