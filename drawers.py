@@ -1,5 +1,5 @@
 from datetime import datetime
-from math import pi, sin, cos
+from math import pi, sin, cos, floor, ceil
 
 
 def animation_loop(canvas_, render_in: str) -> None:
@@ -54,7 +54,7 @@ def render_analog(canvas_in, hour_in: int, minute_in: int, second_in: int):
     if not 0 <= second_in <= 59:
         raise ValueError("second_in must be somewhere from 0 through 59")
 
-    # Basic constants
+    # Basic spatial constants
     guide_offset = 425  # Pixels
     guide_length = 450  # Pixels
     hour_hand_length = 200  # Pixels
@@ -143,4 +143,41 @@ def render_digital(canvas_in, hour_in: int, minute_in: int, second_in: int):
     if not 0 <= second_in <= 59:
         raise ValueError("second_in must be somewhere from 0 through 59")
 
-    pass    # TODO: Implement
+    # Wipe the canvas
+    canvas_in.delete("all")
+
+    # Basic spatial constants
+    outer_box_margin_horizontal = 50    # Pixels
+    outer_box_margin_vertical = 250     # Pixels
+
+    # Conversions from hour to major
+    hour_to_major = ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"] * 2
+
+    # Conversions from minute/5 to minor
+    minute_over_five_to_minor = ["A", "E", "B", "F#", "C#", "G#", "Eb", "Bb", "F", "C", "G", "D"]
+
+    # Draw outer black box
+    canvas_in.create_rectangle(0 + outer_box_margin_horizontal, 0 + outer_box_margin_vertical, 900 - outer_box_margin_horizontal, 900 - outer_box_margin_vertical, outline="black")
+
+    # Draw colon
+    canvas_in.create_text(450, 450, text=":", font=("Helvetica", 128), fill="black")
+
+    # Draw major symbol
+    canvas_in.create_text((outer_box_margin_horizontal + 450) / 2, 450, text=hour_to_major[hour_in], font=("Helvetica", 128), fill="black")
+
+    # Draw superposition of two minor symbols
+    # Determine symbols to draw, and the opacities at which to draw them
+    round_0 = floor(minute_in / 5)  # The minute that's a multiple of 5 that's closest to our number, and not greater than it -- divided by 5
+    round_1 = ceil(minute_in / 5)   # The minute that's a multiple of 5 that's closest to our number, and not less than it -- divided by 5
+    opacity_0 = abs(minute_in - round_0)
+    if round_0 == round_1:
+        opacity_1 = 0
+    else:
+        opacity_1 = abs(minute_in - round_1)
+    symbol_0, symbol_1 = minute_over_five_to_minor[round_0], minute_over_five_to_minor[round_1]
+    # Draw them
+    canvas_in.create_text((900 - outer_box_margin_horizontal - 450) / 2, 450, text=symbol_0, font=("Helvetica", 128), fill="black", alpha=opacity_0)
+    canvas_in.create_text((900 - outer_box_margin_horizontal - 450) / 2, 450, text=symbol_1, font=("Helvetica", 128), fill="black", alpha=opacity_1)
+
+    # Update the canvas
+    canvas_in.update()
