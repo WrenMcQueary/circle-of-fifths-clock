@@ -170,31 +170,43 @@ def render_digital(window_in, canvas_in, hour_in: int, minute_in: int, second_in
     # Determine symbols to draw, and the opacities at which to draw them
     round_0 = floor(minute_in / 5)  # The minute that's a multiple of 5 that's closest to our number, and not greater than it -- divided by 5
     round_1 = ceil(minute_in / 5)   # The minute that's a multiple of 5 that's closest to our number, and not less than it -- divided by 5
-    opacity_0 = abs(minute_in - round_0)
+    opacity_0 = abs(minute_in/5 - round_0)
     if round_0 == round_1:
         opacity_1 = 0
     else:
-        opacity_1 = abs(minute_in - round_1)
+        opacity_1 = abs(minute_in/5 - round_1)
     symbol_0, symbol_1 = minute_over_five_to_minor[round_0], minute_over_five_to_minor[round_1]
     # Draw them
-    create_text_with_transparency(window_in, canvas_in, (900 - outer_box_margin_horizontal - 450) / 2, 450, text=symbol_0, font=("Helvetica", 128), fill="black", alpha=opacity_0)
-    create_text_with_transparency(window_in, canvas_in, (900 - outer_box_margin_horizontal - 450) / 2, 450, text=symbol_1, font=("Helvetica", 128), fill="black", alpha=opacity_1)
+    if opacity_0 > opacity_1:
+        canvas_in.create_text((900 - outer_box_margin_horizontal + 450) / 2, 450, text=symbol_0, font=("Helvetica", 128), fill=opacity_to_hex_color(opacity_0))
+        canvas_in.create_text((900 - outer_box_margin_horizontal + 450) / 2, 450, text=symbol_1, font=("Helvetica", 128), fill=opacity_to_hex_color(opacity_1))
+    else:
+        canvas_in.create_text((900 - outer_box_margin_horizontal + 450) / 2, 450, text=symbol_1, font=("Helvetica", 128), fill=opacity_to_hex_color(opacity_1))
+        canvas_in.create_text((900 - outer_box_margin_horizontal + 450) / 2, 450, text=symbol_0, font=("Helvetica", 128), fill=opacity_to_hex_color(opacity_0))
 
     # Update the canvas
     canvas_in.update()
 
 
-def create_text_with_transparency(window, canvas, x, y, **options):
-    """Extends Tkinter's canvas.create_text by allowing for an alpha value.
-    Based on the example shown here: https://www.tutorialspoint.com/how-to-make-a-tkinter-canvas-rectangle-transparent
+def opacity_to_hex_color(opacity) -> str:
+    """Given an opacity from 0 through 1, return a hex code for a color.  For example, 0 -> '#ffffff' and 1 -> '#000000'
     """
-    if "alpha" in options:
-        # Calculate the alpha transparency for every color (RGB)
-        alpha = int(options.pop("alpha") * 255)
-        # Use the fill variable to fill the shape with transparent color
-        fill = options.pop('fill')
-        fill = window.winfo_rgb(fill) + (alpha,)
-        image = Image.new('RGBA', (900, 900), fill)
-        images.append(ImageTk.PhotoImage(image))
-        canvas.create_image(x, y, image=images[-1], anchor='nw')
-        canvas.create_rectangle(x, y, a, b, **options)
+    # Handle errors
+    # opacity not int or float
+    if not (isinstance(opacity, int) or isinstance(opacity, float)):
+        raise TypeError("opacity must be a float or int")
+    # opacity outside of legal range
+    if not 0 <= opacity <= 1:
+        raise ValueError("opacity must be in range 0 <= opacity <= 1")
+
+    opacity_as_int = round(opacity * 255)
+    single_hex = hex(opacity_as_int)
+    # Remove the leading "0x" and convert to a two-digit format
+    hex_as_two_digits = single_hex
+    hex_as_two_digits = hex_as_two_digits[2:]
+    if len(hex_as_two_digits) == 1:
+        hex_as_two_digits = "0" + hex_as_two_digits
+    # Convert to color format
+    hex_as_color_format = "#" + hex_as_two_digits*3
+
+    return hex_as_color_format

@@ -10,7 +10,6 @@ from drawers import animation_loop
 
 
 # TODO: Write readme
-# TODO: "Digital" version
 
 
 if __name__ == "__main__":
